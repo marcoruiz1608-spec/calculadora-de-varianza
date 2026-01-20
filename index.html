@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Varianza</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-top: 0;
+            border-bottom: 2px solid #eee;
+            padding-bottom: 15px;
+        }
+        
+        .description {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 25px;
+            border-left: 4px solid #3498db;
+        }
+        
+        .input-section {
+            margin-bottom: 25px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        textarea {
+            width: 100%;
+            height: 100px;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: vertical;
+            transition: border 0.3s;
+        }
+        
+        textarea:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+        
+        .input-hint {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        
+        .buttons {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 25px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background-color 0.3s;
+            flex: 1;
+            min-width: 150px;
+        }
+        
+        button:hover {
+            background-color: #2980b9;
+        }
+        
+        #clearBtn {
+            background-color: #e74c3c;
+        }
+        
+        #clearBtn:hover {
+            background-color: #c0392b;
+        }
+        
+        .results {
+            display: none;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            padding: 20px;
+            margin-top: 20px;
+            border-left: 4px solid #2ecc71;
+        }
+        
+        .result-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        
+        .result-label {
+            font-weight: 500;
+        }
+        
+        .result-value {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        
+        .formula {
+            background-color: #f1f8ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-top: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-top: 10px;
+            display: none;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        .stat-box {
+            background-color: white;
+            border-radius: 5px;
+            padding: 15px;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.05);
+            text-align: center;
+        }
+        
+        .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #3498db;
+            margin: 10px 0;
+        }
+        
+        .stat-label {
+            font-size: 14px;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 600px) {
+            .container {
+                padding: 15px;
+            }
+            
+            button {
+                min-width: 100%;
+            }
+            
+            .buttons {
+                flex-direction: column;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculadora de Varianza</h1>
+        
+        <div class="description">
+            <p>Esta calculadora determina la varianza de un conjunto de datos. Ingresa los valores numéricos separados por comas, espacios o saltos de línea.</p>
+            <p><strong>Varianza poblacional (σ²):</strong> Usa todos los datos de la población.</p>
+            <p><strong>Varianza muestral (s²):</strong> Usa una muestra de la población (divide por n-1 en lugar de n).</p>
+        </div>
+        
+        <div class="input-section">
+            <label for="dataInput">Ingresa tus datos:</label>
+            <textarea id="dataInput" placeholder="Ejemplo: 5, 8, 12, 15, 20 o 5 8 12 15 20"></textarea>
+            <div class="input-hint">Los valores pueden estar separados por comas, espacios o saltos de línea.</div>
+        </div>
+        
+        <div class="buttons">
+            <button id="calculateBtn">Calcular Varianza</button>
+            <button id="exampleBtn">Usar Datos de Ejemplo</button>
+            <button id="clearBtn">Limpiar</button>
+        </div>
+        
+        <div class="error" id="errorMsg"></div>
+        
+        <div class="results" id="resultsSection">
+            <h2 class="result-title">Resultados</h2>
+            
+            <div class="stats-grid">
+                <div class="stat-box">
+                    <div class="stat-label">Cantidad de datos</div>
+                    <div class="stat-value" id="countResult">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Media (promedio)</div>
+                    <div class="stat-value" id="meanResult">0</div>
+                </div>
+                <div class="stat-box">
+                    <div class="stat-label">Suma total</div>
+                    <div class="stat-value" id="sumResult">0</div>
+                </div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-label">Varianza Poblacional (σ²):</div>
+                <div class="result-value" id="populationVariance">0</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Desviación Estándar Poblacional (σ):</div>
+                <div class="result-value" id="populationStdDev">0</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Varianza Muestral (s²):</div>
+                <div class="result-value" id="sampleVariance">0</div>
+            </div>
+            <div class="result-item">
+                <div class="result-label">Desviación Estándar Muestral (s):</div>
+                <div class="result-value" id="sampleStdDev">0</div>
+            </div>
+            
+            <div class="formula">
+                <strong>Fórmulas:</strong><br>
+                Media: μ = Σx / n<br>
+                Varianza poblacional: σ² = Σ(x - μ)² / n<br>
+                Varianza muestral: s² = Σ(x - μ)² / (n - 1)<br>
+                Desviación estándar: σ = √σ², s = √s²
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const dataInput = document.getElementById('dataInput');
+            const calculateBtn = document.getElementById('calculateBtn');
+            const exampleBtn = document.getElementById('exampleBtn');
+            const clearBtn = document.getElementById('clearBtn');
+            const resultsSection = document.getElementById('resultsSection');
+            const errorMsg = document.getElementById('errorMsg');
+            
+            // Elementos de resultados
+            const countResult = document.getElementById('countResult');
+            const meanResult = document.getElementById('meanResult');
+            const sumResult = document.getElementById('sumResult');
+            const populationVariance = document.getElementById('populationVariance');
+            const populationStdDev = document.getElementById('populationStdDev');
+            const sampleVariance = document.getElementById('sampleVariance');
+            const sampleStdDev = document.getElementById('sampleStdDev');
+            
+            // Ejemplo de datos
+            const exampleData = [15, 18, 22, 25, 28, 30, 32, 35, 38, 40, 42, 45, 48, 50, 55];
+            
+            // Función para parsear los datos ingresados
+            function parseData(input) {
+                // Reemplazar saltos de línea por comas
+                let dataString = input.replace(/\n/g, ',');
+                // Dividir por comas o espacios
+                let values = dataString.split(/[, ]+/);
+                
+                // Filtrar valores vacíos y convertir a números
+                let numbers = [];
+                for (let val of values) {
+                    if (val.trim() !== '') {
+                        let num = parseFloat(val);
+                        if (!isNaN(num)) {
+                            numbers.push(num);
+                        } else {
+                            return { success: false, error: `"${val}" no es un número válido` };
+                        }
+                    }
+                }
+                
+                if (numbers.length === 0) {
+                    return { success: false, error: "No se encontraron números válidos" };
+                }
+                
+                return { success: true, data: numbers };
+            }
+            
+            // Función para calcular la varianza
+            function calculateVariance(data) {
+                const n = data.length;
+                
+                // Calcular la suma
+                const sum = data.reduce((acc, val) => acc + val, 0);
+                
+                // Calcular la media
+                const mean = sum / n;
+                
+                // Calcular la suma de las diferencias al cuadrado
+                const squaredDifferences = data.map(val => Math.pow(val - mean, 2));
+                const sumSquaredDifferences = squaredDifferences.reduce((acc, val) => acc + val, 0);
+                
+                // Calcular varianzas
+                const populationVar = sumSquaredDifferences / n;
+                const sampleVar = n > 1 ? sumSquaredDifferences / (n - 1) : 0;
+                
+                // Calcular desviaciones estándar
+                const populationStd = Math.sqrt(populationVar);
+                const sampleStd = Math.sqrt(sampleVar);
+                
+                return {
+                    count: n,
+                    sum: sum,
+                    mean: mean,
+                    populationVariance: populationVar,
+                    populationStdDev: populationStd,
+                    sampleVariance: sampleVar,
+                    sampleStdDev: sampleStd
+                };
+            }
+            
+            // Función para mostrar resultados
+            function showResults(results) {
+                countResult.textContent = results.count;
+                sumResult.textContent = results.sum.toFixed(2);
+                meanResult.textContent = results.mean.toFixed(2);
+                populationVariance.textContent = results.populationVariance.toFixed(4);
+                populationStdDev.textContent = results.populationStdDev.toFixed(4);
+                sampleVariance.textContent = results.sampleVariance.toFixed(4);
+                sampleStdDev.textContent = results.sampleStdDev.toFixed(4);
+                
+                resultsSection.style.display = 'block';
+                errorMsg.style.display = 'none';
+            }
+            
+            // Función para mostrar error
+            function showError(message) {
+                errorMsg.textContent = message;
+                errorMsg.style.display = 'block';
+                resultsSection.style.display = 'none';
+            }
+            
+            // Evento para calcular
+            calculateBtn.addEventListener('click', function() {
+                const input = dataInput.value.trim();
+                
+                if (input === '') {
+                    showError("Por favor, ingresa algunos datos para calcular.");
+                    return;
+                }
+                
+                const parsed = parseData(input);
+                
+                if (!parsed.success) {
+                    showError(parsed.error);
+                    return;
+                }
+                
+                const results = calculateVariance(parsed.data);
+                showResults(results);
+            });
+            
+            // Evento para cargar datos de ejemplo
+            exampleBtn.addEventListener('click', function() {
+                dataInput.value = exampleData.join(', ');
+                
+                // Calcular automáticamente con los datos de ejemplo
+                const results = calculateVariance(exampleData);
+                showResults(results);
+            });
+            
+            // Evento para limpiar
+            clearBtn.addEventListener('click', function() {
+                dataInput.value = '';
+                resultsSection.style.display = 'none';
+                errorMsg.style.display = 'none';
+                dataInput.focus();
+            });
+            
+            // Permitir calcular con la tecla Enter (Ctrl+Enter en textarea)
+            dataInput.addEventListener('keydown', function(e) {
+                if (e.ctrlKey && e.key === 'Enter') {
+                    calculateBtn.click();
+                }
+            });
+            
+            // Cargar datos de ejemplo al inicio
+            exampleBtn.click();
+        });
+    </script>
+</body>
+</html>
